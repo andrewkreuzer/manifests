@@ -83,8 +83,6 @@ spec:
           enabled: true
     clusterMetrics:
       enabled: true
-      kepler:
-        enabled: true
     annotationAutodiscovery:
       enabled: true
     clusterEvents:
