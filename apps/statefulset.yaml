@@ -21,11 +21,14 @@ spec:
   selector:
     matchLabels:
       app: file-write-test
-  replicas: 1
+  replicas: 3
   template:
     metadata:
       labels:
         app: file-write-test
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "2112"
     spec:
       imagePullSecrets:
         - name: andrewkreuzer-dockerhub-secret
@@ -39,13 +42,16 @@ spec:
       containers:
       - name: file-write-test
         image: andrewkreuzer/personal:pvc-write-test
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         args:
           - --all
           - --dir
           - /data
           - --interval
           - 5s
+        ports:
+        - name: metrics
+          containerPort: 2112
         resources:
           requests:
             cpu: 100m
