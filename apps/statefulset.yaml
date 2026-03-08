@@ -27,8 +27,9 @@ spec:
       labels:
         app: file-write-test
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "2112"
+        k8s.grafana.com/job: "pvc-test"
+        k8s.grafana.com/scrape: "true"
+        k8s.grafana.com/metrics.portName: "metrics"
     spec:
       imagePullSecrets:
         - name: andrewkreuzer-dockerhub-secret
