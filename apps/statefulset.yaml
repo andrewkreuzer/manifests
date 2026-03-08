@@ -1,11 +1,23 @@
 ---
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Service
 metadata:
   name: file-write-test
   labels:
     app: file-write-test
 spec:
+  clusterIP: None
+  selector:
+    app: file-write-test
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: file-write-test
+  labels:
+    app: file-write-test
+spec:
+  serviceName: file-write-test
   selector:
     matchLabels:
       app: file-write-test
@@ -17,6 +29,13 @@ spec:
     spec:
       imagePullSecrets:
         - name: andrewkreuzer-dockerhub-secret
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: DoNotSchedule
+          labelSelector:
+            matchLabels:
+              app: file-write-test
       containers:
       - name: file-write-test
         image: andrewkreuzer/personal:pvc-write-test
@@ -37,20 +56,14 @@ spec:
         volumeMounts:
         - name: data
           mountPath: /data
-      volumes:
-      - name: data
-        persistentVolumeClaim:
-          claimName: file-test-pvc
       restartPolicy: Always
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: file-test-pvc
-spec:
-  accessModes:
-    - ReadWriteOnce
-  storageClassName: ceph-block
-  resources:
-    requests:
-      storage: 10Gi
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: ceph-block
+      resources:
+        requests:
+          storage: 10Gi
