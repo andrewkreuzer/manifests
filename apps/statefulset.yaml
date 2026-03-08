@@ -55,10 +55,10 @@ spec:
           containerPort: 2112
         resources:
           requests:
-            cpu: 100m
+            cpu: 500m
             memory: 1Gi
           limits:
-            cpu: 100m
+            cpu: 500m
             memory: 1Gi
         volumeMounts:
         - name: data
