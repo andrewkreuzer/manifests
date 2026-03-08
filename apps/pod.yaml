@@ -1,48 +1,52 @@
 ---
-# https://kubernetes.io/docs/concepts/workloads/pods/
-apiVersion: v1
-kind: Pod
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: "nginx"
+  name: file-write-test
   labels:
-    app: "nginx"
-  annotations:
-    kubectl.kubernetes.io/default-container:  nginx
-spec:
-  containers:
-  - name: nginx
-    image: "nginx"
-    ports:
-    - containerPort: 80
-      name: http
-    volumeMounts:
-    - name: data
-      mountPath: /data
-  volumes:
-  - name: data
-    persistentVolumeClaim:
-      claimName: test-pvc
-  restartPolicy: Always
----
-# https://kubernetes.io/docs/concepts/services-networking/service/
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx-lb
+    app: file-write-test
 spec:
   selector:
-    app: nginx
-  type: LoadBalancer
-  ports:
-  - name: http
-    protocol: TCP
-    port: 80
-    targetPort: 80
+    matchLabels:
+      app: file-write-test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: file-write-test
+    spec:
+      imagePullSecrets:
+        - name: andrewkreuzer-dockerhub-secret
+      containers:
+      - name: file-write-test
+        image: andrewkreuzer/personal:pvc-write-test
+        imagePullPolicy: IfNotPresent
+        args:
+          - --all
+          - --dir
+          - /data
+          - --interval
+          - 5s
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: file-test-pvc
+      restartPolicy: Always
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: test-pvc
+  name: file-test-pvc
 spec:
   accessModes:
     - ReadWriteOnce
