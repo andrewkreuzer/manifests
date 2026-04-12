@@ -41,7 +41,7 @@ spec:
     cluster:
       name: coven
     destinations:
-      - name: grafana-cloud-metrics
+      grafana-cloud-metrics:
         type: prometheus
         urlFrom: convert.nonsensitive(remote.kubernetes.secret.grafana_cloud_metrics.data["prom-host"])
         auth:
@@ -52,7 +52,7 @@ spec:
           create: false
           name: grafana-credentials
           namespace: monitoring
-      - name: grafana-cloud-logs
+      grafana-cloud-logs:
         type: loki
         urlFrom: convert.nonsensitive(remote.kubernetes.secret.grafana_cloud_logs.data["loki-host"])
         auth:
@@ -63,7 +63,7 @@ spec:
           create: false
           name: grafana-credentials
           namespace: monitoring
-      - name: gc-otlp-endpoint
+      gc-otlp-endpoint:
         type: otlp
         urlFrom: convert.nonsensitive(remote.kubernetes.secret.gc_otlp_endpoint.data["otlp-host"])
         protocol: http
@@ -81,16 +81,86 @@ spec:
           enabled: true
         traces:
           enabled: true
+
+    collectors:
+      alloy-singleton: {}
+      alloy-metrics:
+        presets: [clustered, statefulset]
+        alloy:
+          storagePath: /var/lib/alloy
+          mounts:
+            extra:
+              - name: alloy-wal
+                mountPath: /var/lib/alloy
+        controller:
+          enableStatefulSetAutoDeletePVC: true
+          volumeClaimTemplates:
+            - metadata:
+                name: alloy-wal
+              spec:
+                accessModes: ["ReadWriteOnce"]
+                storageClassName: "rook-ceph"
+                resources:
+                  requests:
+                    storage: 5Gi
+      alloy-logs:
+        presets: [filesystem-log-reader, daemonset]
+        alloy:
+          storagePath: /var/lib/alloy
+          mounts:
+            extra:
+              - name: alloy-log-positions
+                mountPath: /var/lib/alloy
+        controller:
+          volumes:
+            extra:
+              - name: alloy-log-positions
+                hostPath:
+                  path: /var/alloy-log-storage
+                  type: DirectoryOrCreate
+      alloy-receiver:
+        enabled: true
+        alloy:
+          extraPorts:
+            - name: otlp-grpc
+              port: 4317
+              targetPort: 4317
+              protocol: TCP
+            - name: otlp-http
+              port: 4318
+              targetPort: 4318
+              protocol: TCP
+
+    podLogsViaLoki:
+      enabled: true
+      collector: alloy-logs
+
     clusterMetrics:
       enabled: true
+      collector: alloy-metrics
+      kube-state-metrics:
+
+    hostMetrics:
+      enabled: true
+      collector: alloy-metrics
+      linuxHosts:
+        enabled: true
+
+    telemetryServices:
+      kube-state-metrics:
+        deploy: true
+      node-exporter:
+        deploy: true
+
     annotationAutodiscovery:
       enabled: true
+
     clusterEvents:
       enabled: true
+
     nodeLogs:
       enabled: true
-    podLogs:
-      enabled: true
+
     applicationObservability:
       enabled: true
       receivers:
@@ -101,6 +171,7 @@ spec:
           http:
             enabled: true
             port: 4318
+
     integrations:
       alloy:
         instances:
@@ -111,21 +182,3 @@ spec:
                 - alloy-singleton
                 - alloy-logs
                 - alloy-receiver
-    alloy-metrics:
-      enabled: true
-    alloy-singleton:
-      enabled: true
-    alloy-logs:
-      enabled: true
-    alloy-receiver:
-      enabled: true
-      alloy:
-        extraPorts:
-          - name: otlp-grpc
-            port: 4317
-            targetPort: 4317
-            protocol: TCP
-          - name: otlp-http
-            port: 4318
-            targetPort: 4318
-            protocol: TCP
