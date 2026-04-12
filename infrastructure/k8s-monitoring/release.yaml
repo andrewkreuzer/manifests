@@ -85,6 +85,8 @@ spec:
     collectors:
       alloy-singleton: {}
       alloy-metrics:
+        annotations:
+          helm.sdk.operatorframework.io/upgrade-force: "true"
         presets: [clustered, statefulset]
         alloy:
           storagePath: /var/lib/alloy
