@@ -92,6 +92,9 @@ spec:
             extra:
               - name: alloy-wal
                 mountPath: /var/lib/alloy
+              - name: release-info
+                mountPath: /etc/release-info
+                subPath: self-reporting-metric.prom
         controller:
           enableStatefulSetAutoDeletePVC: true
           volumeClaimTemplates:
