@@ -24,6 +24,8 @@ spec:
         app.kubernetes.io/name: persephone
         app.kubernetes.io/part-of: persephone
     spec:
+      imagePullSecrets:
+        - name: andrewkreuzer-dockerhub-secret
       containers:
       - name: persephone
         image: andrewkreuzer/personal:persephone-server@sha256:a6a7cfc681567295518410b3b6fb48feb2ca17647598850c29b1c0fa48cfe4a5
