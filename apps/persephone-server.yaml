@@ -106,6 +106,9 @@ metadata:
   namespace: persephone
 spec:
   ingressClassName: tailscale
+  tls:
+    - hosts:
+        - persephone
   rules:
   - http:
       paths:
