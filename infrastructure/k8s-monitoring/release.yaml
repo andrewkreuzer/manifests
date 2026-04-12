@@ -95,6 +95,7 @@ spec:
               - name: release-info
                 mountPath: /etc/release-info
         controller:
+          replicas: 3
           enableStatefulSetAutoDeletePVC: true
           volumeClaimTemplates:
             - metadata:
@@ -144,7 +145,6 @@ spec:
     clusterMetrics:
       enabled: true
       collector: alloy-metrics
-      kube-state-metrics:
 
     hostMetrics:
       enabled: true
