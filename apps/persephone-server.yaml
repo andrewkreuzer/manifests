@@ -24,12 +24,17 @@ spec:
         app.kubernetes.io/name: persephone
         app.kubernetes.io/part-of: persephone
     spec:
+      securityContext:
+        fsGroup: 10001
       imagePullSecrets:
         - name: andrewkreuzer-dockerhub-secret
       containers:
       - name: persephone
-        image: andrewkreuzer/personal:persephone-server@sha256:a6a7cfc681567295518410b3b6fb48feb2ca17647598850c29b1c0fa48cfe4a5
+        image: andrewkreuzer/personal:persephone-server@sha256:6175fedd7eb5b70d073c6b4c6baf6404a0a3bacff2bc7589695d7a65b079fe98
         imagePullPolicy: IfNotPresent
+        securityContext:
+          runAsUser: 10001
+          runAsGroup: 10001
         resources:
           requests:
             cpu: 100m
