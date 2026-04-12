@@ -135,6 +135,10 @@ spec:
       enabled: true
       collector: alloy-logs
 
+    nodeLogs:
+      enabled: true
+      collector: alloy-logs
+
     clusterMetrics:
       enabled: true
       collector: alloy-metrics
@@ -146,21 +150,13 @@ spec:
       linuxHosts:
         enabled: true
 
-    telemetryServices:
-      kube-state-metrics:
-        deploy: true
-      node-exporter:
-        deploy: true
-
     annotationAutodiscovery:
       enabled: true
       collector: alloy-metrics
 
     clusterEvents:
       enabled: true
-
-    nodeLogs:
-      enabled: true
+      collector: alloy-singleton
 
     applicationObservability:
       enabled: true
@@ -173,6 +169,12 @@ spec:
           http:
             enabled: true
             port: 4318
+
+    telemetryServices:
+      kube-state-metrics:
+        deploy: true
+      node-exporter:
+        deploy: true
 
     integrations:
       alloy:
